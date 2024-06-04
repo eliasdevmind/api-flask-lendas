@@ -9,17 +9,14 @@ from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 import logging
 
-# Carregar variáveis de ambiente
 load_dotenv()
 
-# Configurar logging
 logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
 
-# Configurações do MySQL
 app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST')
 app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')
 app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')
@@ -27,17 +24,14 @@ app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')
 
 mysql = MySQL(app)
 
-# Configurações do JWT
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 jwt = JWTManager(app)
 
-# Configuração do Swagger UI
 SWAGGER_URL = '/api/docs'
 API_URL = '/static/swagger.json'
 swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "Flask MySQL API"})
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
-# Recursos da API
 class UserRegister(Resource):
     def post(self):
         try:
@@ -83,7 +77,6 @@ class Protected(Resource):
         current_user = get_jwt_identity()
         return jsonify(logged_in_as=current_user), 200
 
-# Mapeamento de recursos
 api.add_resource(UserRegister, '/register')
 api.add_resource(UserLogin, '/login')
 api.add_resource(Protected, '/protected')
