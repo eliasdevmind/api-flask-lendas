@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, redirect
 from flask_restful import Resource, Api
 from flask_mysqldb import MySQL
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required
@@ -12,7 +12,13 @@ load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
-api = Api(app)
+
+# Forçar redirecionamento para HTTPS
+@app.before_request
+def before_request():
+    if not request.is_secure:
+        url = request.url.replace('http://', 'https://', 1)
+        return redirect(url, code=301)
 
 app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST')
 app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')
@@ -26,6 +32,8 @@ jwt = JWTManager(app)
 
 SWAGGER_URL = '/api/docs'
 API_URL = '/static/swagger.json'
+
+# Atualizar a rota Swagger UI para HTTPS
 swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "Flask MySQL API"})
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
@@ -65,10 +73,10 @@ class Protected(Resource):
     def get(self):
         return jsonify(logged_in_as=request.get_json())
 
+api = Api(app)
 api.add_resource(UserRegister, '/register')
 api.add_resource(UserLogin, '/login')
 api.add_resource(Protected, '/protected')
 
 if __name__ == '__main__':
     app.run(debug=True, port=int(os.environ.get('PORT', 5000)))
-
