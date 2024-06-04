@@ -71,8 +71,7 @@ api.add_resource(UserLogin, '/login')
 api.add_resource(Protected, '/protected')
 
 if __name__ == '__main__':
-    # Determine o esquema de URL com base na presença da variável de ambiente 'HTTPS'
-    if os.getenv('HTTPS') == 'on':
-        app.run(debug=True, port=int(os.environ.get('PORT', 5000)), ssl_context='adhoc')
-    else:
-        app.run(debug=True, port=int(os.environ.get('PORT', 5000)))
+    # Defina o esquema de URL como 'https' para garantir que as URLs geradas sejam sempre https
+    app.config['PREFERRED_URL_SCHEME'] = 'https'
+
+    app.run(debug=True, port=int(os.environ.get('PORT', 5000)))
