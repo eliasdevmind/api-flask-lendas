@@ -65,10 +65,10 @@ class Protected(Resource):
     def get(self):
         return jsonify(logged_in_as=request.get_json())
 
+# Adicione os recursos após a definição das classes
 api.add_resource(UserRegister, '/register')
 api.add_resource(UserLogin, '/login')
 api.add_resource(Protected, '/protected')
 
 if __name__ == '__main__':
     app.run(debug=True, port=int(os.environ.get('PORT', 5000)))
-
