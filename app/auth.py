@@ -1,36 +1,9 @@
-import os
-from dotenv import load_dotenv
-from flask import Flask, request, jsonify
-from flask_restful import Resource, Api
-from flask_mysqldb import MySQL
-from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
-from flask_swagger_ui import get_swaggerui_blueprint
-from flask_cors import CORS
+from flask import request, jsonify
+from flask_restful import Resource
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from . import mysql
 import logging
-
-load_dotenv()
-
-logging.basicConfig(level=logging.DEBUG)
-
-app = Flask(__name__)
-CORS(app)
-api = Api(app)
-
-app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST')
-app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')
-app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')
-app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')
-
-mysql = MySQL(app)
-
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
-jwt = JWTManager(app)
-
-SWAGGER_URL = '/api/docs'
-API_URL = '/static/swagger.json'
-swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "Flask MySQL API"})
-app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
 class UserRegister(Resource):
     def post(self):
@@ -76,10 +49,3 @@ class Protected(Resource):
     def get(self):
         current_user = get_jwt_identity()
         return jsonify(logged_in_as=current_user), 200
-
-api.add_resource(UserRegister, '/register')
-api.add_resource(UserLogin, '/login')
-api.add_resource(Protected, '/protected')
-
-if __name__ == '__main__':
-    app.run(debug=True, port=int(os.environ.get('PORT', 5000)))
